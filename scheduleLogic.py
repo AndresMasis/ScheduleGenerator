@@ -140,18 +140,21 @@ def updateTeacherSchedule(courseName, teacherName, newSchedule):
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   This function checks which of 2 teachers has the lower priority in case there is collision
-   The decision is based on who has the higher amount of credits in the course they are giving
-   It receives 2 strings as parameters which are the courses of each teacher to be compared
-   It returns True if the first teacher has lower priority
-   It returns False in case the second has lower priority or both have the same priority'''
+   This function fills the course of the teacher, its schedule and credits
+   It receives as parameter a list of names
+   It receives a list of tuples according to the the given names'''
 
 
-def firstIsLessImportant(courseA, courseB):
-    if coursesDictionary[courseA][1] < coursesDictionary[courseB][1]:
-        return True
-    else:
-        return False
+def mergeData(combination):
+    retList = []
+
+    i = 0
+    for teacher in combination:
+        #             Course name       course credits                teacher name         teacher schedule
+        retList.append((keysList[i], coursesDictionary[keysList[i]][1], teacher, coursesDictionary[keysList[i]][0][teacher]))
+        i += 1
+
+    return retList
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,24 +170,18 @@ def checkCombination(teachers):
     # Compares a single teacher with all the others
     i = 0  # Index for the current teacher
     for currentTeacher in combination:
-        # Takes a single teacher to be compared
+        # Takes a new single teacher to compare with the teacher we are analyzing
+
         j = 0  # Index of the comparison teacher per comparison iteration
         for comparisonTeacher in combination:
-            if i != j:
-                # It makes sure it is comparing 2 different individuals
-
-                # The schedules are lists of tuples [(0,1),(0,2),(3,1),(3,2)]
-                currentTeacherSchedule = coursesDictionary[keysList[i]][0][currentTeacher[2]]  # current teacher
-                comparisonTeacherSchedule = coursesDictionary[keysList[j]][0][comparisonTeacher[2]]  # comparison teacher
-
-
+            if comparisonTeacher != currentTeacher:
                 # Checks if one of the tuples of the currentTeacher is in the other teacher schedule
-                for scheduleTuple in currentTeacherSchedule:
-                    if scheduleTuple in comparisonTeacherSchedule:
+                for scheduleTuple in currentTeacher[-1]:
+                    if scheduleTuple in comparisonTeacher[-1]:
                         # A collision was found
 
-                        # Checks which teacher survive and which one is gone
-                        if firstIsLessImportant(keysList[i], keysList[j]):
+                        # Checks which teacher has a higher priority
+                        if currentTeacher[1] < currentTeacher[1]:
                             # First one leaves, second one stays
                             if currentTeacher in combination:
                                 combination.remove(currentTeacher)
@@ -194,7 +191,7 @@ def checkCombination(teachers):
                             if comparisonTeacher in combination:
                                 combination.remove(comparisonTeacher)
 
-                j += 1
+            j += 1
 
         i += 1
 
@@ -229,29 +226,15 @@ def myFunction(argument):
 
 def makeCombinations():
     # This for creates all the possible combinations of teachers between different courses
+    i = 0
     for combination in product(*myFunction(coursesDictionary.values())):
+        print('Combinacion ' + str(i))
+        print(combination)
         # combination is a tuple that has a combination of teachers (it has the teacher name which is his key)   (Jorge, Yuen, Ivannia)
 
         #                         checks if the created combination has collisions
         generatedSchedules.append(checkCombination(combination))
-
-
-'''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   This function fills the course of the teacher, its schedule and credits
-   It receives as parameter a list of names
-   It receives a list of tuples according to the the given names'''
-
-
-def mergeData(combination):
-    retList = []
-
-    i = 0
-    for teacher in combination:
-        #             Course name       course credits                teacher name         teacher schedule
-        retList.append((keysList[i], coursesDictionary[keysList[i]][1], teacher, coursesDictionary[keysList[i]][0][teacher]))
         i += 1
-
-    return retList
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -266,14 +249,15 @@ def checkPositionInTuple(combination, i, j):
     i //= 4
 
     pos = 0
+    # This for searches if a teacher has that schedule
     for teacher in combination:
         if (j, i) in teacher[-1]:
-            # The teacher was found
+            # The teacher that has that position was found
             return pos
 
         pos += 1
 
-    # The teacher was never found
+    # There is not teacher that has that schedule
     return None
 
 
@@ -311,7 +295,7 @@ def printSchedule():
     for combination in generatedSchedules:
         # Prints the days at the very first in the top for the combination
         print('\t\t---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
-        print('\t\t|\t\t\t\t\tLunes\t\t\t\t\t|\t\t\t\tMartes\t\t\t\t\t\t|\t\t\t\t\tMiercoles\t\t\t\t|\t\t\t\t\tJueves\t\t\t\t\t|\t\t\t\t\tViernes\t\t\t\t\t|\t\t\t\t\tSabado\t\t\t\t\t|')
+        print('\t\t|\t\t\t\t\tLunes\t\t\t\t\t|\t\t\t\t\tMartes\t\t\t\t\t|\t\t\t\t\tMiercoles\t\t\t\t|\t\t\t\t\tJueves\t\t\t\t\t|\t\t\t\t\tViernes\t\t\t\t\t|\t\t\t\t\tSabado\t\t\t\t\t|')
         print('-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
 
         # This for manages the vertical part, it has line jumps
