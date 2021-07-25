@@ -1,4 +1,12 @@
+import tkinter as tk
 from itertools import product
+
+
+'''
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Backend
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 
 
 coursesDictionary = {}
@@ -39,7 +47,11 @@ def addCourse(courseName, credits):
 
 
 def addTeacherToCourse(courseName, teacherName, teacherSchedule):
-    coursesDictionary[courseName][0][teacherName] = teacherSchedule
+    if teacherName not in coursesDictionary[courseName][0]:
+        coursesDictionary[courseName][0][teacherName] = teacherSchedule
+
+    else:
+        addTeacherToCourse(courseName, teacherName + ' ', teacherSchedule)
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,14 +66,67 @@ def deleteCourse(courseName):
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   This function deletes a teacher from the teacher dictionary of a course
+   This function deletes a teacher from the teacher dictionary of a course just one time
+   It deletes the first teacher with the name it finds
    It receives as parameter a string that is the key of the course where the teacher resides
-   another string that is the name of the new teacher (its key in the teachers dictionary)
+   another string that is the name of the teacher (its key in the teachers dictionary)
    It does not return anything'''
 
 
-def deleteTeacherFromCourse(courseName, teacherName):
+def deleteTeacherFromCourseOnce(courseName, teacherName):
     del coursesDictionary[courseName][0][teacherName]
+
+
+'''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   This function deletes a teacher from the teacher dictionary of a course all the times it appears
+   It deletes all the teachers with the name it finds
+   It receives as parameter a string that is the key of the course where the teacher resides
+   another string that is the name of the teacher (its key in the teachers dictionary)
+   It does not return anything'''
+
+
+def deleteTeacherFromCourseAll(courseName, teacherName):
+    # Removes end spaces in case it is a copy to have as root the most pure name
+    teacherName = teacherName.rstrip()
+
+    dictionarySize = len(coursesDictionary[courseName][0])
+    i = 0
+    # Starts adding spaces to check also for the copies and delete the if so
+    while i < dictionarySize:
+        if teacherName in coursesDictionary[courseName][0]:
+            # Found a key with that desired teacher, deletes it
+            del coursesDictionary[courseName][0][teacherName]
+
+        teacherName += ' '  # Adds an space at the end
+        i += 1
+
+
+'''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   This function deletes a teacher from the teacher dictionary of all the course all the times it appears
+   It deletes all the teachers with the name it finds
+   It receives as parameter a string that is the name of the teacher (its key in the teachers dictionary)
+   It does not return anything'''
+
+
+def deleteTeacherFromEverything(teacherName):
+    # Removes end spaces in case it is a copy to have as root the most pure name
+    rootStr = teacherName.rstrip()
+
+    i = 0
+    for course in coursesDictionary:
+        dictionarySize = len(course[0])
+        j = 0
+        # Starts adding spaces to check also for the copies and delete the if so
+        while j < dictionarySize:
+            if teacherName in coursesDictionary[keysList[i]][0]:
+                # Found a key with that desired teacher, deletes it
+                del coursesDictionary[keysList[i]][0][teacherName]
+
+            teacherName += ' '  # Adds an space at the end
+            j += 1
+
+        i += 1
+        teacherName = rootStr
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,7 +148,8 @@ def updateCourseName(oldName, newName):
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   This function changes the name of a teacher in a specific course
+   This function changes the name of a teacher in a specific course just one time
+   It updates the first teacher that has that name 
    This will change the key of the teacher in the teachers dictionary of just that course
    It receives as parameter a string that is the key of the course where the teacher currently resides
    another string that is the current (name) key of the teacher in the teachers dictionary of that course
@@ -91,9 +157,34 @@ def updateCourseName(oldName, newName):
    It does not return anything'''
 
 
-def updateTeacherNameOnce(courseKey, oldName, newName):
+def updateTeacherNameCourseOnce(courseKey, oldName, newName):
     # Updates the teachers dictionary of the given course
     coursesDictionary[courseKey][0][newName] = coursesDictionary[courseKey][0].pop(oldName)
+
+
+'''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   This function deletes a teacher from the teacher dictionary of a course all the times it appears
+   It deletes all the teachers with the name it finds
+   It receives as parameter a string that is the key of the course where the teacher resides
+   another string that is the name of the teacher (its key in the teachers dictionary)
+   It does not return anything'''
+
+
+def updateTeacherNameCourseAll(courseKey, oldName, newName):
+    # Removes end spaces in case it is a copy to have as root the most pure name
+    oldName = oldName.rstrip()
+
+    dictionarySize = len(coursesDictionary[courseKey][0])
+    i = 0
+    # Starts adding spaces to check also for the copies and delete the if so
+    while i < dictionarySize:
+        if oldName in coursesDictionary[courseKey][0]:
+            # Found a key with that desired teacher, deletes it
+            coursesDictionary[courseKey][0][newName] = coursesDictionary[courseKey][0].pop(oldName)
+            newName += ' '  # Adds an space at the end to avoid collisions in case another update is needed
+
+        oldName += ' '  # Adds an space at the end
+        i += 1
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,16 +195,32 @@ def updateTeacherNameOnce(courseKey, oldName, newName):
    It does not return anything'''
 
 
-def updateTeacherNameAll(oldName, newName):
+def updateTeacherNameEverything(oldName, newName):
+    # Removes end spaces in case it is a copy to have as root the most pure name
+    oldNameRoot = oldName.rstrip()
+    newNameRoot = newName.rstrip()
+
     # Goes thru all the courses dictionary checking course by course
     for courseKey, courseValue in coursesDictionary.items():
         # It takes a specific course to analyze
-        # courseValue looks like [{'Jorge': [(0,1),(0,2),(3,1),(3,2)], 'Kirstein': [(5,8),(6,9),(5,8),(6,9)]}, 4]
+        # courseValue looks like [{'Jorge': [(0,1),(0,2),(3,1),(3,2)], 'Kirstein': [(5,8),(6,9),(5,8),(6,9)]}, 0]
 
-        # Checks if the teacher (key) exists in the teachersDictionary
-        if oldName in courseValue[0].keys():
-            # That teacher does exist, so it can be modified
-            coursesDictionary[courseKey][0][newName] = coursesDictionary[courseKey][0].pop(oldName)
+        # Checks teachers dictionary if it has to teacher to be updated
+        dictionarySize = len(coursesDictionary[courseKey][0])
+        i = 0
+        # Starts adding spaces to check also for the copies and delete the if so
+        while i < dictionarySize:
+            # Checks if the teacher (key) exists in the teachersDictionary
+            if oldName in courseValue[0].keys():
+                # That teacher does exist, so it can be modified
+                coursesDictionary[courseKey][0][newName] = coursesDictionary[courseKey][0].pop(oldName)
+                newName += ' '
+
+            i += 1
+            oldName += ' '
+
+        oldName = oldNameRoot
+        newName = newNameRoot
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -205,15 +312,23 @@ def checkCombination(teachers):
    It looks like dict_values([[{'Law Wa Yuen': [(3, 7), (3, 8)], 'Ivannia Cerdas': [(3, 7), (5, 8)]}, 4], [{'Daniel Lewis': [(3, 5), (3, 6), (3, 7)]}, 2], [{'Platon de Atenas': [(0, 3), (2, 4)]}, 2]])
    It makes a list of list
    Each sublist is a list of the teachers of a given course
-   It returns the flattened list'''
+   This function also checks that all the courses have at least 1 teacher each one
+   In case everything is alright it returns the flattened list
+   In case a course has no teachers, it returns false'''
 
 
 def myFunction(argument):
     myList = []
 
     for element in argument:
-        myList.append(tuple(element[0].keys()))
+        if element:
+            myList.append(tuple(element[0].keys()))
 
+        else:
+            # There is a course with no teachers
+            return False
+
+    # Returns the flattened list
     return myList
 
 
@@ -221,20 +336,36 @@ def myFunction(argument):
    This function makes all the possible combinations of teachers of coursesDictionary
    It combines each teacher of course A, with each teacher of course B, with each teacher of course C and son on
    If fills the generatedSchedules list by appending all the possible combination
-   It receives no parameters and does not return anything'''
+   It receives no parameters
+   It returns True in case all the combinations could be done properly
+   In case something went wrong it returns False'''
 
 
 def makeCombinations():
     # This for creates all the possible combinations of teachers between different courses
-    i = 0
-    for combination in product(*myFunction(coursesDictionary.values())):
-        print('Combinacion ' + str(i))
-        print(combination)
-        # combination is a tuple that has a combination of teachers (it has the teacher name which is his key)   (Jorge, Yuen, Ivannia)
+    myResult = myFunction(coursesDictionary.values())
 
-        #                         checks if the created combination has collisions
-        generatedSchedules.append(checkCombination(combination))
-        i += 1
+    # Checks if it was an error in the user input
+    if isinstance(myResult, list):
+        # Everything is ok
+        for combination in product(*myResult):
+            # combination is a tuple that has a combination of teachers (it has the teacher name which is his key)   (Jorge, Yuen, Ivannia)
+
+            #                         checks if the created combination has collisions
+            generatedSchedules.append(checkCombination(combination))
+
+        return True
+
+    else:
+        # There was an error on the users input
+        return False
+
+
+'''
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Front end
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 
 
 '''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -286,90 +417,140 @@ def resizeStr(myString):
 
 
 def printSchedule():
-    # Base to print the hours of the schedule
-    hoursList = ('7:30', '8:20', '\t', '-------', '8:30', '9:20', '\t', '-------', '9:30', '10:20', '\t', '-------', '10:30', '11:20', '\t', '-------', '11:30', '12:20',
-                 '\t', '-------', '13:00', '13:50', '\t', '-------',  '14:00', '14:50', '\t', '-------',  '15:00', '15:50', '\t', '-------', '16:00', '16:50', '\t', '-------',  '17:00', '17:50',
-                 '\t', '-------', '18:00', '18:50', '\t', '-------',  '19:00', '19:50', '\t', '-------', '20:00', '20:50', '\t', '-------', '21:00', '21:50', '\t', '-------')
+    if makeCombinations():
+        # Initial message
+        print('Asegurate de tener el ajuste de linea desactivado para evitar problemas con el formato visual de los horarios')
+        print('Eso lo puedes revisar en:')
+        print('\t-Menu superiror de Bloc de notas')
+        print('\t-Formato')
+        print('\t-Ajuste de linea debe estar sin seleccionar')
+        print(' ')
+        print(' ')
 
-    # Print the schedule for each created combination
-    for combination in generatedSchedules:
-        # Prints the days at the very first in the top for the combination
-        print('\t\t---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
-        print('\t\t|\t\t\t\t\tLunes\t\t\t\t\t|\t\t\t\t\tMartes\t\t\t\t\t|\t\t\t\t\tMiercoles\t\t\t\t|\t\t\t\t\tJueves\t\t\t\t\t|\t\t\t\t\tViernes\t\t\t\t\t|\t\t\t\t\tSabado\t\t\t\t\t|')
-        print('-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+        # Base to print the hours of the schedule
+        hoursList = ('7:30 ', '8:20 ', '     ', '---------', '8:30 ', '9:20 ', '     ', '---------', '9:30 ', '10:20', '     ', '---------', '10:30', '11:20', '     ', '---------', '11:30', '12:20',
+                     '     ', '---------', '13:00', '13:50', '     ', '---------',  '14:00', '14:50', '     ', '---------',  '15:00', '15:50', '     ', '---------', '16:00', '16:50', '     ', '---------',  '17:00', '17:50',
+                     '     ', '---------', '18:00', '18:50', '     ', '---------',  '19:00', '19:50', '     ', '---------', '20:00', '20:50', '     ', '---------', '21:00', '21:50', '     ', '---------')
 
-        # This for manages the vertical part, it has line jumps
-        for i in range(56):
-            # It prints the hour. Ex: 7:30  |
-            print(hoursList[i] + "\t", end="|  ")
+        # Print the schedule for each created combination
+        for combination in generatedSchedules:
+            # Prints the days at the very first in the top for the combination
+            print('         --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+            print('         |                    Lunes                     |                    Martes                    |                    Miercoles                 |                    Jueves                    |                    Viernes                   |                    Sabado                    |')
+            print('-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
 
-            # This for manages the horizontal part, it goes on the same line
-            for j in range(0, 6):
-                dataPos = i % 4  # Determines what part of the data will be printed, needed for the adjustment
-
-                if dataPos == 3:
-                    # It is the turn of the separation between a block and the next one
-                    print('--------------------------------------------', end='')
-
+            # This for manages the vertical part, it has line jumps
+            for i in range(56):
+                # It prints the hour. Ex: 7:30  |
+                if i%4 == 3:
+                    # In this specific case the spaces are unnecessary
+                    print(hoursList[i], end="| ")
                 else:
-                    # In this turn it may be data
-                    foundTeacherPos = checkPositionInTuple(combination, i, j)  # Determines if it has data or not
+                    print(hoursList[i] + "    ", end="|  ")
 
-                    if foundTeacherPos is None:
-                        # It was not data
-                        print('\t\t\t\t\t\t\t\t\t\t\t', end='|  ')
+                # This for manages the horizontal part, it goes on the same line
+                for j in range(0, 6):
+                    dataPos = i % 4  # Determines what part of the data will be printed, needed for the adjustment
+
+                    if dataPos == 3:
+                        # It is the turn of the separation between a block and the next one
+                        print('-----------------------------------------------', end='')
 
                     else:
-                        # It is data
+                        # In this turn it may be data
+                        foundTeacherPos = checkPositionInTuple(combination, i, j)  # Determines if it has data or not
 
-                        if dataPos == 0:
-                            # It is the name of the course
-                            stringToPrint = resizeStr(combination[foundTeacherPos][0])
-                            print(stringToPrint + '\t\t', end='|  ')
+                        if foundTeacherPos is None:
+                            # It was not data
+                            print('                                            ', end='|  ')
 
-                        elif dataPos == 1:
-                            # It is the amount of credits
-                            stringToPrint = resizeStr(str(combination[foundTeacherPos][1]) + ' creditos')
-                            print(stringToPrint + '\t\t', end='|  ')
+                        else:
+                            # It is data
 
-                        elif dataPos == 2:
-                            # It is the name of the teacher
-                            stringToPrint = resizeStr(combination[foundTeacherPos][2])
-                            print(stringToPrint + '\t\t', end='|  ')
+                            if dataPos == 0:
+                                # It is the name of the course
+                                stringToPrint = resizeStr(combination[foundTeacherPos][0])
+                                print(stringToPrint + '        ', end='|  ')
 
-            # Prints a line jump at the end of each line of the schedule
-            print('')
+                            elif dataPos == 1:
+                                # It is the amount of credits
+                                stringToPrint = resizeStr(str(combination[foundTeacherPos][1]) + ' creditos')
+                                print(stringToPrint + '        ', end='|  ')
 
-        # Prints several spaces between a schedule and another to separate them
-        print('\n\n\n\n')
+                            elif dataPos == 2:
+                                # It is the name of the teacher
+                                stringToPrint = resizeStr(combination[foundTeacherPos][2])
+                                print(stringToPrint + '        ', end='|  ')
+
+                # Prints a line jump at the end of each line of the schedule
+                print('')
+
+            # Prints several spaces between a schedule and another to separate them
+            print(' ')
+            print(' ')
+            print(' ')
+            print(' ')
 
 
-'''-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   Currently used for tests'''
+
+'''
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Gui
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
+
+'''
+# Creates frame
+root = tk.Tk()
+
+# Frame dimensioning
+canvas = tk.Canvas(root, width=600, height=500)
+canvas.grid(columnspan=4, rowspan=4)
+
+# Test label
+lblTest = tk.Label(text='Hola', font='Raleway')
+lblTest.grid(columnspan=3, column=1, row=0)
+
+# Test label
+tstBtnText = tk.StringVar()
+tstBtnText.set('Boton')
+btnTest = tk.Button(root, textvariable=tstBtnText, command=lambda:test(), font='Raleway', bg='#20bebe', fg='white', height=2, width=15)
+btnTest.grid(column=1, row=2)
+
+root.mainloop()'''
+
+'''
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Run
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 
 
 def test():
     addCourse("Analisis de Algoritmos", 4)
-    addCourse("Arquitectura de Computadores",4)
-    addCourse("Ingles", 2)
     addCourse("Seminarios de Estudios Filosoficos", 2)
+    addCourse("Probabilidades", 4)
+    addCourse("Matematica General", 3)
+    addCourse("Arquitectura de Computadores", 4)
 
-    addTeacherToCourse("Analisis de Algoritmos", "Law Wa Yuen", [(1, 5), (1, 6), (3, 5), (3, 6)])
-    addTeacherToCourse("Analisis de Algoritmos", "Ivannia Cerdas", [(2, 0), (2, 1), (4, 0), (4, 1)])
+    addTeacherToCourse("Analisis de Algoritmos", "Algoritmos 1", [(1, 5), (1, 6), (3, 5), (3, 6)])
+    addTeacherToCourse("Analisis de Algoritmos", "Algoritmos 2", [(1, 5), (1, 6), (3, 5), (3, 6)])
+    addTeacherToCourse("Analisis de Algoritmos", "Algoritmos 3", [(1, 5), (1, 6), (3, 5), (3, 6)])
+    addTeacherToCourse("Analisis de Algoritmos", "Algoritmos 4", [(1, 5), (1, 6), (3, 5), (3, 6)])
+    addTeacherToCourse("Analisis de Algoritmos", "Algoritmos 5", [(2, 0), (2, 1), (4, 0), (4, 1)])
 
-    addTeacherToCourse("Arquitectura de Computadores", "Jorge Vargas", [(2, 10), (2, 11), (4, 10), (4, 11)])
-    addTeacherToCourse("Arquitectura de Computadores", "Kirstein Gatjens", [(0, 0), (0, 1), (0, 2), (0, 3)])
+    addTeacherToCourse("Seminarios de Estudios Filosoficos", "Filosofo 1", [(2, 0), (2, 1), (4, 0), (4, 1)])
 
-    addTeacherToCourse("Ingles", "Daniel Lewis", [(0, 2), (0, 3), (0, 4)])
+    addTeacherToCourse("Arquitectura de Computadores", "Arqui 1", [(2, 11), (2, 12), (4, 11), (4, 12)])
 
-    addTeacherToCourse("Seminarios de Estudios Filosoficos", "Platon de Atenas", [(1, 3), (1, 4), (3, 3), (3, 4)])
-    addTeacherToCourse("Seminarios de Estudios Filosoficos", "Confucio", [(0, 0), (0, 1), (2, 0), (2, 1)])
+    addTeacherToCourse("Probabilidades", "Proba 1", [(1, 2), (1, 3), (3, 2), (3, 3)])
 
-    makeCombinations()
+    addTeacherToCourse("Matematica General", "Mate 1", [(0, 0), (0, 1), (0, 2), (0, 3)])
+    addTeacherToCourse("Matematica General", "Mate 2", [(1, 2), (1, 3), (3, 2), (3, 3)])
 
     printSchedule()
 
 
 if __name__ == "__main__":
     test()
-    print()
+
