@@ -418,35 +418,40 @@ def resizeStr(myString):
 
 def printSchedule():
     if makeCombinations():
+        # To write in the txt file
+        f = open("testFile.txt", "a")
+
+        f.truncate(0)
+
         # Initial message
-        print('Asegurate de tener el ajuste de linea desactivado para evitar problemas con el formato visual de los horarios')
-        print('Eso lo puedes revisar en:')
-        print('\t-Menu superiror de Bloc de notas')
-        print('\t-Formato')
-        print('\t-Ajuste de linea debe estar sin seleccionar')
-        print(' ')
-        print(' ')
+        f.write('Asegurate de tener el ajuste de linea desactivado para evitar problemas con el formato visual de los horarios\n')
+        f.write('Eso lo puedes revisar en:\n')
+        f.write('\t-Menu superiror de Bloc de notas\n')
+        f.write('\t-Formato\n')
+        f.write('\t-Ajuste de linea debe estar sin seleccionar\n')
+        f.write(' \n')
+        f.write(' \n')
 
         # Base to print the hours of the schedule
-        hoursList = ('7:30 ', '8:20 ', '     ', '---------', '8:30 ', '9:20 ', '     ', '---------', '9:30 ', '10:20', '     ', '---------', '10:30', '11:20', '     ', '---------', '11:30', '12:20',
-                     '     ', '---------', '13:00', '13:50', '     ', '---------',  '14:00', '14:50', '     ', '---------',  '15:00', '15:50', '     ', '---------', '16:00', '16:50', '     ', '---------',  '17:00', '17:50',
-                     '     ', '---------', '18:00', '18:50', '     ', '---------',  '19:00', '19:50', '     ', '---------', '20:00', '20:50', '     ', '---------', '21:00', '21:50', '     ', '---------')
+        hoursList = ('|7:30 ', '|8:20 ', '|     ', '|---------', '|8:30 ', '|9:20 ', '|     ', '|---------', '|9:30 ', '|10:20', '|     ', '|---------', '|10:30', '|11:20', '|     ', '|---------', '|11:30', '|12:20',
+                     '|     ', '|---------', '|13:00', '|13:50', '|     ', '|---------',  '|14:00', '|14:50', '|     ', '|---------',  '|15:00', '|15:50', '|     ', '|---------', '|16:00', '|16:50', '|     ', '|---------',  '|17:00', '|17:50',
+                     '|     ', '|---------', '|18:00', '|18:50', '|     ', '|---------',  '|19:00', '|19:50', '|     ', '|---------', '|20:00', '|20:50', '|     ', '|---------', '|21:00', '|21:50', '|     ', '|---------')
 
         # Print the schedule for each created combination
         for combination in generatedSchedules:
             # Prints the days at the very first in the top for the combination
-            print('         --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
-            print('         |                    Lunes                     |                    Martes                    |                    Miercoles                 |                    Jueves                    |                    Viernes                   |                    Sabado                    |')
-            print('-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+            f.write('          ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+            f.write('          |                    Lunes                     |                    Martes                    |                    Miercoles                 |                    Jueves                    |                    Viernes                   |                    Sabado                    |\n')
+            f.write('----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n')
 
             # This for manages the vertical part, it has line jumps
             for i in range(56):
                 # It prints the hour. Ex: 7:30  |
                 if i%4 == 3:
                     # In this specific case the spaces are unnecessary
-                    print(hoursList[i], end="| ")
+                    f.write(hoursList[i] + "|")
                 else:
-                    print(hoursList[i] + "    ", end="|  ")
+                    f.write(hoursList[i] + "    |  ")
 
                 # This for manages the horizontal part, it goes on the same line
                 for j in range(0, 6):
@@ -454,7 +459,7 @@ def printSchedule():
 
                     if dataPos == 3:
                         # It is the turn of the separation between a block and the next one
-                        print('-----------------------------------------------', end='')
+                        f.write('-----------------------------------------------')
 
                     else:
                         # In this turn it may be data
@@ -462,7 +467,7 @@ def printSchedule():
 
                         if foundTeacherPos is None:
                             # It was not data
-                            print('                                            ', end='|  ')
+                            f.write('                                            |  ')
 
                         else:
                             # It is data
@@ -470,27 +475,30 @@ def printSchedule():
                             if dataPos == 0:
                                 # It is the name of the course
                                 stringToPrint = resizeStr(combination[foundTeacherPos][0])
-                                print(stringToPrint + '        ', end='|  ')
+                                f.write(stringToPrint + '        |  ')
 
                             elif dataPos == 1:
                                 # It is the amount of credits
                                 stringToPrint = resizeStr(str(combination[foundTeacherPos][1]) + ' creditos')
-                                print(stringToPrint + '        ', end='|  ')
+                                f.write(stringToPrint + '        |  ')
 
                             elif dataPos == 2:
                                 # It is the name of the teacher
                                 stringToPrint = resizeStr(combination[foundTeacherPos][2])
-                                print(stringToPrint + '        ', end='|  ')
+                                f.write(stringToPrint + '        |  ')
 
                 # Prints a line jump at the end of each line of the schedule
-                print('')
+                f.write(' \n')
 
             # Prints several spaces between a schedule and another to separate them
-            print(' ')
-            print(' ')
-            print(' ')
-            print(' ')
+            f.write(' \n')
+            f.write(' \n')
+            f.write(' \n')
+            f.write(' \n')
+            f.write(' \n')
 
+        # Closes the file
+        f.close()
 
 
 '''
